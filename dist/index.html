@@ -1,10 +1,574 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <title>Hello</title>
-  <meta charset="utf-8">
+	<title>OMG</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		html,
+		body {
+			overflow: hidden;
+		}
+
+		body {
+			background-color: #f0f0f0;
+			color: #444;
+			padding: 0;
+			margin: 0;
+		}
+
+		a {
+			color: #08f;
+		}
+
+		#view-label {
+			background: #FFF;
+			color: #000;
+			padding: 8px 16px;
+			border-radius: 150px;
+			cursor: pointer;
+		}
+	</style>
+
+	<!-- Debug panel -->
+	<!-- <div id="debug" class="fixed top-0 left-0 bg-white p-2 max-w-full break-words"></div> -->
+
+	<div id="interface-top"
+		class="fixed top-0 w-full flex opacity-0 flex-col items-between justify-between p-10 text-white">
+		<div class="flex items-center justify-between">
+			<svg id="close" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+				stroke="currentColor" class="w-10 h-10 cursor-pointer">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+			<button id="view-label">
+				View Label
+			</button>
+		</div>
+	</div>
+
+	<div id="interface-bottom"
+		class="fixed bottom-0 w-full flex opacity-0 flex-col items-between justify-between p-10 text-white space-y-10">
+		<div class="flex items-center justify-end">
+
+			<a id="product-href" href="" target="blank">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+					stroke="currentColor" class="w-10 h-10">
+					<path stroke-linecap="round" stroke-linejoin="round"
+						d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+				</svg>
+			</a>
+		</div>
+		<div class="flex items-center justify-between">
+			<svg id="previous-product" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+				stroke-width="1.5" stroke="currentColor" class="w-10 h-10  cursor-pointer">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+			</svg>
+
+			<p id="product-description"></p>
+
+			<svg id="next-product" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+				stroke="currentColor" class="w-10 h-10  cursor-pointer">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+			</svg>
+		</div>
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js"
+		integrity="sha512-n8IpKWzDnBOcBhRlHirMZOUvEq2bLRMuJGjuVqbzUJwtTsgwOgK5aS0c1JA647XWYfqvXve8k3PtZdzpipFjgg=="
+		crossorigin="anonymous"></script>
+	<script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.2/gsap.min.js"></script>
+	<script src="./hammer.min.js"></script>
+	<script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body>
-    <div>My static 2.0.</div>
+
+	<script type="module">
+
+		let container;
+		let camera, scene, raycaster, renderer, controls;
+
+		const bottles = [
+			{
+				file: 'Label_Airy-Shampoo-min.jpg',
+				name: 'Label_Airy-Shampoo-min.jpg',
+				details: 'The description for this product.',
+				storeUrl: 'https://website.com',
+			},
+			{
+				file: 'Label_Airy-Treatment-min.jpg',
+				name: 'Label_Airy-Treatment-min.jpg',
+				details: 'The description for this product.',
+				storeUrl: 'https://website.com',
+			},
+			{
+				file: 'Label_Glossy-Shampoo-min.jpg',
+				name: 'Label_Glossy-Shampoo-min.jpg',
+				details: 'The description for this product.',
+				storeUrl: 'https://website.com',
+			},
+			{
+				file: 'Label_Glossy-Treatment-min.jpg',
+				name: 'Label_Glossy-Treatment-min.jpg',
+				details: 'The description for this product.',
+				storeUrl: 'https://website.com',
+			},
+			{
+				file: 'Label_Scalp-Shampoo-min.jpg',
+				name: 'Label_Scalp-Shampoo-min.jpg',
+				details: 'The description for this product.',
+				storeUrl: 'https://website.com',
+			},
+			{
+				file: 'Label_Scalp-Treatment-min.jpg',
+				name: 'Label_Scalp-Treatment-min.jpg',
+				details: 'The description for this product.',
+				storeUrl: 'https://website.com',
+			},
+		];
+
+		var textureLoader = new THREE.TextureLoader();
+		// Load textures dynamically
+		for (const bottle of bottles) {
+			var texture = textureLoader.load(`/models/${bottle.file}`);
+			texture.flipY = false;
+			bottle.texture = texture;
+		};
+
+		let INTERSECTED, INTERSECTED_BOTTLE;
+		let theta = 0;
+		let cameraRotateAngle = 0;
+		let rotateSpeed = 0.002
+
+		const pointer = new THREE.Vector2();
+		const radius = 100;
+
+		let selectedItem = null;
+		let viewingLabel = false;
+		let focusLight = null;
+
+		let deltaX = 2;
+		let wholeBottleDeltaX = 0;
+		let currentDelta = 0;
+		let clones = [];
+		let gamma, alpha, beta
+
+
+		init();
+		animate();
+
+		function init() {
+			container = document.createElement('div');
+			document.body.appendChild(container);
+
+			camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
+			camera.position.set(300, 500, 500)
+
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color(0x000000);
+
+			const light = new THREE.DirectionalLight(0xffffff, .8);
+			light.position.set(1, 1, 1).normalize();
+			scene.add(light);
+
+			focusLight = new THREE.PointLight(0xffffff, 0.8);
+			focusLight.position.set(1, 1, 1).normalize();
+			scene.add(focusLight);
+
+			const ambience = new THREE.AmbientLight(0x404040, .7); // soft white light
+			scene.add(ambience);
+
+			const geometry = new THREE.BoxGeometry(20, 20, 20);
+
+			const rows = 5;
+			const cols = 5;
+			const gap = 0.0001;
+
+			for (let row = 0; row < rows; row++) {
+				for (let col = 0; col < cols; col++) {
+					for (let z = 0; z < rows; z++) {
+						const item = loadItem((bottle) => {
+							const pos = (((200 / 2) * rows) / 2 + gap) - 50;
+							const x = (pos * row) + (Math.random() * 150);
+							const y = (pos * col) + (Math.random() * 150);
+							bottle.position.set(300 - x, 300 - y, 300 - (pos * z) + (Math.random() * 150));
+
+							bottle.rotation.x = Math.random() * 2 * Math.PI;
+							bottle.rotation.y = Math.random() * 2 * Math.PI;
+							bottle.rotation.z = Math.random() * 2 * Math.PI;
+
+							bottle.scale.x = 300;
+							bottle.scale.y = 300;
+							bottle.scale.z = 300;
+
+							bottle.name = 'bottle';
+
+							scene.add(bottle);
+						}, bottles[row % 6])
+					}
+				}
+			}
+
+			raycaster = new THREE.Raycaster();
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.xr.enabled = true;
+			container.appendChild(renderer.domElement);
+
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
+			controls.enableDamping = true;
+			camera.position.set(0, 20, 100);
+			controls.update();
+
+			window.addEventListener('resize', onWindowResize);
+			document.addEventListener('mousemove', onPointerMove);
+			document.addEventListener('click', onClick);
+			document.getElementById('view-label').addEventListener('click', toggleLabel)
+			document.getElementById('previous-product').addEventListener('click', () => changeProduct(true))
+			document.getElementById('next-product').addEventListener('click', () => changeProduct(false))
+			document.getElementById('close').addEventListener('click', () => closeProduct())
+
+			// Pan controls
+			var hammertime = new Hammer(document, {});
+			hammertime.on('pan', function (ev) {
+				let deltaOffset = currentDelta - ev.deltaX
+				currentDelta = ev.deltaX
+				if (deltaOffset > 0) {
+					if (deltaX > 2) {
+						deltaX = 2
+					} else deltaX -= 0.015
+
+					wholeBottleDeltaX -= 0.04
+				} else if (deltaOffset < 0) {
+					if (deltaX < 0.8) {
+						deltaX = 0.8
+					} else deltaX += 0.015
+
+					wholeBottleDeltaX += 0.04
+				}
+			});
+
+			askForGyro();
+		}
+
+		function loadItem(cb, product) {
+			const loader = new THREE.GLTFLoader();
+
+			loader.load(
+				// resource URL
+				'models/Bottle_lowpoly_static_center.glb',
+				// called when the resource is loaded
+				function (glb) {
+					var model = glb.scene;
+					model.traverse((o) => {
+						if (o.isMesh) {
+							o.material.map = product.texture;
+						}
+					});
+					model.product = product.file
+					cb(glb.scene);
+				},
+				// called while loading is progressing
+				function (xhr) {
+					console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+				},
+				// called when loading has errors
+				function (error) {
+					console.log('An error happened');
+				}
+			);
+		}
+
+		function selectItem(item) {
+			if (item !== null) {
+				item.isSelected = true;
+				selectedItem = item;
+			}
+
+			return item;
+		}
+
+		function itemIsCurrentlySelected(item) {
+			if (selectedItem == item) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		function onWindowResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		}
+
+		function onPointerMove(event) {
+			pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+			pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+		}
+
+		function onClick() {
+			// Reset rotation of previously selected item
+			if (selectedItem) {
+				selectedItem.rotation.x = Math.random() * 2 * Math.PI;
+				selectedItem.rotation.y = Math.random() * 2 * Math.PI;
+				selectedItem.rotation.z = Math.random() * 2 * Math.PI;
+			}
+
+			if (INTERSECTED_BOTTLE && !viewingLabel) {
+				if (INTERSECTED_BOTTLE.cloneOf) {
+					selectedItem = scene.children.find(x => x.uuid === INTERSECTED_BOTTLE.cloneOf)
+				} else {
+					selectedItem = INTERSECTED_BOTTLE;
+				}
+				viewingLabel = false;
+				wholeBottleDeltaX = 0;
+				document.getElementById('interface-top').style.display = 'flex'
+				document.getElementById('interface-bottom').style.display = 'flex'
+				gsap.to(document.getElementById('interface-top'), { opacity: 1, duration: 1 });
+				gsap.to(document.getElementById('interface-bottom'), { opacity: 1, duration: 1 });
+				document.getElementById('product-description').innerText = bottles[findProductIndexByFile(selectItem.product)].details
+				document.getElementById('product-href').href = bottles[findProductIndexByFile(selectItem.product)].storeUrl
+				controls.enabled = false
+			}
+
+			// Remove all clones from scene
+			scene.children.filter(x => x.clone === true).forEach(clone => {
+				scene.remove(clone)
+				clones = []
+			})
+		}
+
+		function handleOrientation(event) {
+			alpha = event.alpha;
+			beta = event.beta;
+			gamma = event.gamma;
+
+			// Debug UI
+			// document.getElementById('debug').innerText = JSON.stringify({
+			// 	alpha, beta, gamma
+			// })
+		}
+
+		function askForGyro() {
+			try {
+				// Request permission for iOS 13+ devices
+				if (DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === "function") {
+					debugLog('requestPermission');
+
+					DeviceOrientationEvent.requestPermission()
+						.then(response => {
+							if (response == 'granted') {
+								window.addEventListener('deviceorientation', handleOrientation, true);
+							} else {
+							}
+						})
+						.catch(error => {
+						});
+
+				} else {
+					try {
+						window.addEventListener('deviceorientation', handleOrientation, true);
+					} catch (e) {
+					}
+				}
+			}
+			catch (e) {
+			}
+		}
+
+		function toggleLabel() {
+			wholeBottleDeltaX = 0
+			deltaX = 2;
+			viewingLabel = !viewingLabel
+			document.getElementById('view-label').innerText = (!viewingLabel ? 'View Label' : 'Back')
+		}
+
+		function findProductIndexByFile(file) {
+			let productIndex = 0
+			for (let i = 0; i < bottles.length; i++) {
+				if (file === bottles[i].file) productIndex = i
+			}
+			return productIndex
+		}
+
+		function changeProduct(previous) {
+			let productIndex = findProductIndexByFile(selectedItem.product)
+
+			const nextProductIndex = previous ? (productIndex === 0 ? 5 : productIndex - 1) : (productIndex === 5 ? 0 : productIndex + 1)
+			const nextProductFile = bottles[nextProductIndex].file
+
+			// Randomise order of scene
+			const shuffledSceneChildren = shuffle(scene.children)
+			INTERSECTED_BOTTLE = shuffledSceneChildren.find(x => x.product === nextProductFile)
+
+			document.getElementById('product-description').innerText = bottles[nextProductIndex].details
+		}
+
+		function closeProduct() {
+			gsap.to(document.getElementById('interface-top'), { opacity: 0, duration: 1, onComplete: () => document.getElementById('interface-top').style.display = 'none' })
+			gsap.to(document.getElementById('interface-bottom'), { opacity: 0, duration: 1, onComplete: () => document.getElementById('interface-bottom').style.display = 'none' })
+			INTERSECTED_BOTTLE = null
+			INTERSECTED = null
+			selectedItem = null
+			gsap.to(camera.position, { x: 0, duration: 1 })
+			gsap.to(camera.position, { y: 0, duration: 1 })
+			gsap.to(camera.position, { z: 0, duration: 1, })
+			controls.enabled = true
+		}
+
+		function shuffle(array) {
+			let currentIndex = array.length, randomIndex;
+
+			// While there remain elements to shuffle.
+			while (currentIndex != 0) {
+
+				// Pick a remaining element.
+				randomIndex = Math.floor(Math.random() * currentIndex);
+				currentIndex--;
+
+				// And swap it with the current element.
+				[array[currentIndex], array[randomIndex]] = [
+					array[randomIndex], array[currentIndex]];
+			}
+
+			return array;
+		}
+
+		function animate() {
+			requestAnimationFrame(animate);
+			render();
+		}
+
+		function render() {
+			theta += 0.01;
+
+			controls.update();
+			// var alphaRotation = alpha ? alpha * (Math.PI / 180) : 0;
+			// var betaRotation = gamma ? gamma * (Math.PI / 180) : 0;
+			// camera.rotation.y = alphaRotation;
+
+			// rotate bottles
+			scene.children.forEach((item) => {
+
+				// move camera to selected item
+				if (itemIsCurrentlySelected(item)) {
+
+					let targetPositionX = item.position.x,
+						targetPositionY = item.position.y,
+						targetPositionZ = item.position.z + 150;
+
+					cameraRotateAngle += rotateSpeed;
+
+					gsap.to(camera.position, { x: item.position.x + Math.cos(cameraRotateAngle) * (viewingLabel ? 45 : 60), duration: 1 })
+					gsap.to(camera.position, { y: item.position.y, duration: 1 })
+					gsap.to(camera.position, {
+						z: item.position.z + Math.sin(cameraRotateAngle) * (viewingLabel ? 45 : 60), duration: 1,
+					})
+
+					gsap.to(controls.target, { x: item.position.x, duration: 1 })
+					gsap.to(controls.target, { y: item.position.y, duration: 1 })
+					gsap.to(controls.target, { z: item.position.z, duration: 1, })
+
+
+					gsap.to(item.rotation, { x: 0, duration: 2 })
+					let nextYRotation = 0;
+					while (item.rotation.y > nextYRotation) {
+						nextYRotation -= Math.PI
+						item.rotation.y = nextYRotation
+					}
+					// DeltaX refers to drag pan speed, change this to increase/decrease the drag speed
+					gsap.to(item.rotation, { y: wholeBottleDeltaX - cameraRotateAngle + (viewingLabel ? deltaX : -1.6), duration: 2 })
+					gsap.to(item.rotation, { z: 0, duration: 2 })
+
+					focusLight.position.x = camera.position.x - 0;
+					focusLight.position.y = camera.position.y - 0;
+					focusLight.position.z = camera.position.z - 30;
+					focusLight.lookAt(item.position)
+
+					camera.updateMatrixWorld();
+				} else {
+					if (item.type === 'Group') {
+						item.rotation.y += rotateSpeed;
+					}
+				}
+			})
+
+			// find intersections 
+			raycaster.setFromCamera(pointer, camera);
+
+			const intersects = raycaster.intersectObjects(scene.children, true);
+
+			if (intersects.length > 0) {
+				if (INTERSECTED != intersects[0].object) {
+					if (INTERSECTED && INTERSECTED.material && INTERSECTED.material.emissive && !viewingLabel) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+
+					INTERSECTED = intersects[0].object;
+					INTERSECTED_BOTTLE = INTERSECTED.parent;
+					gsap.to(INTERSECTED_BOTTLE.scale, { x: 350, duration: 1 })
+					gsap.to(INTERSECTED_BOTTLE.scale, { y: 350, duration: 1 })
+					gsap.to(INTERSECTED_BOTTLE.scale, { z: 350, duration: 1 })
+
+					if ((selectedItem && (selectedItem.uuid !== INTERSECTED_BOTTLE.uuid)) || !selectedItem) {
+						if (INTERSECTED_BOTTLE && (clones.length === 0)) {
+							try {
+								// Clone object 						
+								const clone = INTERSECTED_BOTTLE.clone()
+								clone.scale.x = 450;
+								clone.scale.y = 450;
+								clone.scale.z = 450;
+								clone.children.forEach(child => {
+									const clonedMaterial = child.material.clone()
+									child.material = clonedMaterial
+									child.material.opacity = 0.1
+									child.material.transparent = true
+								})
+								clone.clone = true;
+								clone.cloneOf = INTERSECTED_BOTTLE.uuid
+								scene.add(clone)
+								clones.push(clone)
+							} catch (e) { }
+						}
+					}
+				}
+			} else {
+				if (INTERSECTED_BOTTLE) {
+					gsap.to(INTERSECTED_BOTTLE.scale, { x: 300, duration: 1 })
+					gsap.to(INTERSECTED_BOTTLE.scale, { y: 300, duration: 1 })
+					gsap.to(INTERSECTED_BOTTLE.scale, { z: 300, duration: 1 })
+
+					for (const child of INTERSECTED_BOTTLE.children) {
+						if (child.material && child.material.emissive) child.material.emissive.setHex(0x000000);
+					}
+
+
+				};
+
+				scene.children.filter(x => x.clone === true).forEach(clone => {
+					scene.remove(clone)
+					clones = []
+				})
+
+				INTERSECTED_BOTTLE = null;
+				INTERSECTED = null
+
+				// Clear all highlighted bottles
+				scene.children.forEach(child => {
+					if (child.name === 'bottle') {
+						gsap.to(child.scale, { x: 300, duration: 1 })
+						gsap.to(child.scale, { y: 300, duration: 1 })
+						gsap.to(child.scale, { z: 300, duration: 1 })
+					}
+				})
+			}
+			renderer.render(scene, camera);
+		}
+	</script>
 </body>
+
 </html>
